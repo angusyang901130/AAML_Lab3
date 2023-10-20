@@ -9,9 +9,9 @@
 #------------------------------------------------------------------------------#
 # Change your own verilog compiler.                                            #
 #------------------------------------------------------------------------------#
-VERILOG=xrun
+#VERILOG=xrun
 #VERILOG=ncverilog
-#VERILOG=iverilog
+VERILOG=iverilog
 
 #------------------------------------------------------------------------------#
 # Directories Declarations                                                     #

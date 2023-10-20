@@ -11,7 +11,7 @@ module PE(
     output reg [31:0]   result;   
 );
 
-wire [32:0] mult_res;
+wire [31:0] mult_res;
 
 assign mult_res = row_in * north_in;
 
@@ -24,7 +24,7 @@ always @(posedge clk or negedge rst_n) begin
     else begin
         row_out <= row_in;
         south_out <= north_in;
-        result <= mult_res;
+        result <= result + mult_res;
     end
 end
 
