@@ -52,7 +52,7 @@ input      [127:0]  C_data_out;
 
 
 //* Implement your design here
-integer i, j, row_grp, col_grp;
+integer i, j;
 
 // Tell PE is done
 reg     done;
@@ -77,6 +77,8 @@ reg [7:0]   K_reg, M_per_compute, M_reg, N_per_compute, N_reg;
 
 // For arbitrary M, N, K
 reg [7:0]   M_div, M_mod, N_div, N_mod;
+reg [7:0]   row_grp, col_grp;
+// reg [15:0]  C_local_index;
 
 /* PE */
 
@@ -145,14 +147,15 @@ always @ (posedge clk or negedge rst_n) begin
     else if(in_valid) begin
         busy <= 1'b1;
         done <= 1'b0;
+
         // $display("Counter= %d, in_valid => busy\n", counter);
         // $display("M= %d, K= %d, N= %d", M, K, N);
         M_reg <= M;
         K_reg <= K;
         N_reg <= N;
 
-        M_per_compute = (M >= 4 ? 4 : M);
-        N_per_compute = (N >= 4 ? 4 : N); 
+        // M_per_compute = (M >= 4 ? 4 : M);
+        // N_per_compute = (N >= 4 ? 4 : N); 
 
         M_mod = M % 4;
         N_mod = N % 4;
@@ -162,92 +165,112 @@ always @ (posedge clk or negedge rst_n) begin
         
         // $display("M_per_compute=%3d, N_compute=%3d\n", M_per_compute, N_per_compute);
         // $display("M_div=%3d, M_mod=%3d, N_div=%3d, N_mod=%3d\n", M_div, M_mod, N_div, N_mod);
+
+        col_grp <= 8'b0;
+        row_grp <= 8'b0;
+
     end
     else if(busy) begin
-        
-        for(col_grp=0; col_grp<N_div; col_grp=col_grp+1) begin
-            for(row_grp=0; row_grp<M_div; row_grp=row_grp+1) begin
-                // $display("Counter: %d\n", counter);
 
-                for(i=0; i<4; i=i+1) begin
-                    A_data_reg[i][0] = A_data_reg[i][1];
-                    A_data_reg[i][1] = A_data_reg[i][2];
-                    A_data_reg[i][2] = A_data_reg[i][3];
-                    A_data_reg[i][3] = 8'b0;
+        done = 1'b0;
+        // $display("col_grp: %3d, row_grp: %3d\n", col_grp, row_grp);
+        // $display("Counter: %d\n", counter);
+        // $display("Done: %1d\n", done);
 
-                    B_data_reg[i][0] = B_data_reg[i][1];
-                    B_data_reg[i][1] = B_data_reg[i][2];
-                    B_data_reg[i][2] = B_data_reg[i][3];
-                    B_data_reg[i][3] = 8'b0;
-                end
-                
-                if(counter < K_reg) begin
-                    A_data_reg[0][0] = A_data_out[31: 24];
-                    A_data_reg[1][1] = A_data_out[23: 16];
-                    A_data_reg[2][2] = A_data_out[15: 8];
-                    A_data_reg[3][3] = A_data_out[7: 0];
+        N_per_compute = (col_grp+1 == N_div && N_mod != 0 ? N_mod : 4);
+        M_per_compute = (row_grp+1 == M_div && M_mod != 0 ? M_mod : 4);
 
-                    B_data_reg[0][0] = B_data_out[31: 24];
-                    B_data_reg[1][1] = B_data_out[23: 16];
-                    B_data_reg[2][2] = B_data_out[15: 8];
-                    B_data_reg[3][3] = B_data_out[7: 0];
-                end
+        for(i=0; i<4; i=i+1) begin
+            A_data_reg[i][0] = A_data_reg[i][1];
+            A_data_reg[i][1] = A_data_reg[i][2];
+            A_data_reg[i][2] = A_data_reg[i][3];
+            A_data_reg[i][3] = 8'b0;
 
-                // $display("A_data_reg:\n");
-                // for(i=0; i<4; i=i+1) 
-                //     $display("%3d %3d %3d %3d\n", A_data_reg[i][3], A_data_reg[i][2], A_data_reg[i][1], A_data_reg[i][0]);
-
-                // $display("B_data_reg:\n");
-                // for(i=3; i>=0; i=i-1)
-                //     $display("%3d %3d %3d %3d\n", B_data_reg[0][i], B_data_reg[1][i], B_data_reg[2][i], B_data_reg[3][i]);
-
-                if(counter < K_reg) begin
-                    A_index <= A_index + 1;
-                    B_index <= B_index + 1;
-                end
-                else begin
-                    A_index <= 16'b0;
-                    B_index <= 16'b0;
-                end
-
-                // $display("Result:\n");
-                // $display("%10d %10d %10d %10d\n", result[0][127:96], result[0][95:64], result[0][63:32], result[0][31:0]);
-                // $display("%10d %10d %10d %10d\n", result[1][127:96], result[1][95:64], result[1][63:32], result[1][31:0]);
-                // $display("%10d %10d %10d %10d\n", result[2][127:96], result[2][95:64], result[2][63:32], result[2][31:0]);
-                // $display("%10d %10d %10d %10d\n", result[3][127:96], result[3][95:64], result[3][63:32], result[3][31:0]);
-
-                // $display("South out:\n");
-                // $display("%10d %10d %10d %10d\n", south_out[0][0], south_out[0][1], south_out[0][2], south_out[0][3]);
-                // $display("%10d %10d %10d %10d\n", south_out[1][0], south_out[1][1], south_out[1][2], south_out[1][3]);
-                // $display("%10d %10d %10d %10d\n", south_out[2][0], south_out[2][1], south_out[2][2], south_out[2][3]);
-                // $display("%10d %10d %10d %10d\n", south_out[3][0], south_out[3][1], south_out[3][2], south_out[3][3]);
-
-                // $display("East out:\n");
-                // $display("%10d %10d %10d %10d\n", east_out[0][0], east_out[0][1], east_out[0][2], east_out[0][3]);
-                // $display("%10d %10d %10d %10d\n", east_out[1][0], east_out[1][1], east_out[1][2], east_out[1][3]);
-                // $display("%10d %10d %10d %10d\n", east_out[2][0], east_out[2][1], east_out[2][2], east_out[2][3]);
-                // $display("%10d %10d %10d %10d\n", east_out[3][0], east_out[3][1], east_out[3][2], east_out[3][3]);
-                
-                if(counter >= K_reg + N_per_compute) begin
-                    C_wr_en = 1'b1;
-                    C_index = col_grp * M_reg + row_grp * 4 + counter - K_reg - N_per_compute;
-                    C_data_in = result[C_index];
-                end
-                else begin
-                    C_wr_en = 1'b0;
-                    C_index = 16'b0;
-                end
-
-                counter <= counter + 1;
-
-                if(counter == K_reg + M_per_compute + N_per_compute) begin
-                    busy <= 1'b0;
-                    done <= 1'b1;
-                    counter <= 8'b0;
-                end
-            end
+            B_data_reg[i][0] = B_data_reg[i][1];
+            B_data_reg[i][1] = B_data_reg[i][2];
+            B_data_reg[i][2] = B_data_reg[i][3];
+            B_data_reg[i][3] = 8'b0;
         end
         
+        if(counter < K_reg) begin
+            A_data_reg[0][0] = A_data_out[31: 24];
+            A_data_reg[1][1] = A_data_out[23: 16];
+            A_data_reg[2][2] = A_data_out[15: 8];
+            A_data_reg[3][3] = A_data_out[7: 0];
+
+            B_data_reg[0][0] = B_data_out[31: 24];
+            B_data_reg[1][1] = B_data_out[23: 16];
+            B_data_reg[2][2] = B_data_out[15: 8];
+            B_data_reg[3][3] = B_data_out[7: 0];
+        end
+
+        // $display("A_data_reg:\n");
+        // for(i=0; i<4; i=i+1) 
+        //     $display("%3d %3d %3d %3d\n", A_data_reg[i][3], A_data_reg[i][2], A_data_reg[i][1], A_data_reg[i][0]);
+
+        // $display("B_data_reg:\n");
+        // for(i=3; i>=0; i=i-1)
+        //     $display("%3d %3d %3d %3d\n", B_data_reg[0][i], B_data_reg[1][i], B_data_reg[2][i], B_data_reg[3][i]);
+        
+
+        if(counter < K_reg) begin
+            A_index = A_index + 1;
+            B_index = B_index + 1;
+        end
+        else begin
+            A_index = (row_grp+1 == M_div ? 16'b0 : K_reg * (row_grp + 1));
+            B_index = (row_grp+1 == M_div ? K_reg * (col_grp + 1) : K_reg * col_grp);
+        end
+
+        // $display("Result:\n");
+        // $display("%10d %10d %10d %10d\n", result[0][127:96], result[0][95:64], result[0][63:32], result[0][31:0]);
+        // $display("%10d %10d %10d %10d\n", result[1][127:96], result[1][95:64], result[1][63:32], result[1][31:0]);
+        // $display("%10d %10d %10d %10d\n", result[2][127:96], result[2][95:64], result[2][63:32], result[2][31:0]);
+        // $display("%10d %10d %10d %10d\n", result[3][127:96], result[3][95:64], result[3][63:32], result[3][31:0]);
+
+        // $display("South out:\n");
+        // $display("%10d %10d %10d %10d\n", south_out[0][0], south_out[0][1], south_out[0][2], south_out[0][3]);
+        // $display("%10d %10d %10d %10d\n", south_out[1][0], south_out[1][1], south_out[1][2], south_out[1][3]);
+        // $display("%10d %10d %10d %10d\n", south_out[2][0], south_out[2][1], south_out[2][2], south_out[2][3]);
+        // $display("%10d %10d %10d %10d\n", south_out[3][0], south_out[3][1], south_out[3][2], south_out[3][3]);
+
+        // $display("East out:\n");
+        // $display("%10d %10d %10d %10d\n", east_out[0][0], east_out[0][1], east_out[0][2], east_out[0][3]);
+        // $display("%10d %10d %10d %10d\n", east_out[1][0], east_out[1][1], east_out[1][2], east_out[1][3]);
+        // $display("%10d %10d %10d %10d\n", east_out[2][0], east_out[2][1], east_out[2][2], east_out[2][3]);
+        // $display("%10d %10d %10d %10d\n", east_out[3][0], east_out[3][1], east_out[3][2], east_out[3][3]);
+        
+        if(counter >= K_reg + N_per_compute) begin
+            C_wr_en = 1'b1;
+            C_index = col_grp * M_reg + row_grp * 4 + counter - K_reg - N_per_compute;
+            // C_local_index = counter - K_reg - N_per_compute
+            C_data_in = result[counter - K_reg - N_per_compute];
+        end
+        else begin
+            C_wr_en = 1'b0;
+            C_index = 16'b0;
+        end
+
+        counter <= counter + 1;
+
+        if(counter == K_reg + M_per_compute + N_per_compute) begin
+            // busy <= 1'b0;
+            if(row_grp+1 == M_div && col_grp+1 == N_div) begin
+                busy <= 1'b0;
+                A_index = 16'b0;
+                B_index = 16'b0;
+            end
+            else if(row_grp+1 < M_div) begin
+                row_grp = row_grp + 1;
+            end
+            else if(row_grp+1 == M_div) begin
+                col_grp = col_grp + 1;
+                row_grp = 0;
+            end
+            
+            done = 1'b1;
+            counter <= 8'b0;
+        end
 
     end
 end
