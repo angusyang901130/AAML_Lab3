@@ -25,8 +25,9 @@ verif1: clean
 	python3 data_generator.py --mode 0 --target_dir verif1 --ncases 10
 	cp verif1/input.txt verif1/input.bk
 	mv verif1/input.txt $(TESTBENCH)/
-	$(VERILOG) $(TESTBENCH)/TESTBENCH.v +define+RTL -loadpli1 debpli:novas_pli_boot\
+#	$(VERILOG) $(TESTBENCH)/TESTBENCH.v +define+RTL -loadpli1 debpli:novas_pli_boot\
     +incdir+$(PWD)/$(TESTBENCH)+$(PWD)/$(RTL_DIR) +access+r
+	$(VERILOG) $(TESTBENCH)/TESTBENCH.v -I $(TESTBENCH)/ -I $(RTL_DIR)/
 
 verif2: clean
 	python3 data_generator.py --mode 1 --target_dir verif2 --ncases 10
