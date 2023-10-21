@@ -54,13 +54,16 @@ input      [127:0]  C_data_out;
 //* Implement your design here
 integer i, j;
 
+// Tell PE is done
+reg     done;
+
 // Row out
-wire [7:0]  east_out[3:0][3:0];
+wire [7:0]      east_out[3:0][3:0];
 
 // Col out
-wire [7:0]  south_out[3:0][3:0];
+wire [7:0]      south_out[3:0][3:0];
 
-wire [127:0] result[3:0];
+wire [127:0]    result[3:0];
 
 // Register to store input data
 reg [7:0] A_data_reg [3:0][3:0];
@@ -75,33 +78,34 @@ reg [7:0] K_reg, M_reg, N_reg;
 /* PE */
 
 // First Row
-PE P00(clk, rst_n, A_data_reg[0][0], B_data_reg[0][0], east_out[0][0], south_out[0][0], result[0][127:96]);
-PE P01(clk, rst_n, east_out[0][0], B_data_reg[1][0], east_out[0][1], south_out[0][1], result[0][95:64]);
-PE P02(clk, rst_n, east_out[0][1], B_data_reg[2][0], east_out[0][2], south_out[0][2], result[0][63:32]);
-PE P03(clk, rst_n, east_out[0][2], B_data_reg[3][0], east_out[0][3], south_out[0][3], result[0][31:0]);
+PE P00(clk, rst_n, done, A_data_reg[0][0], B_data_reg[0][0], east_out[0][0], south_out[0][0], result[0][127:96]);
+PE P01(clk, rst_n, done, east_out[0][0], B_data_reg[1][0], east_out[0][1], south_out[0][1], result[0][95:64]);
+PE P02(clk, rst_n, done, east_out[0][1], B_data_reg[2][0], east_out[0][2], south_out[0][2], result[0][63:32]);
+PE P03(clk, rst_n, done, east_out[0][2], B_data_reg[3][0], east_out[0][3], south_out[0][3], result[0][31:0]);
 
 // Second Row
-PE P10(clk, rst_n, A_data_reg[1][0], south_out[0][0], east_out[1][0], south_out[1][0], result[1][127:96]);
-PE P11(clk, rst_n, east_out[1][0], south_out[0][1], east_out[1][1], south_out[1][1], result[1][95:64]);
-PE P12(clk, rst_n, east_out[1][1], south_out[0][2], east_out[1][2], south_out[1][2], result[1][63:32]);
-PE P13(clk, rst_n, east_out[1][2], south_out[0][3], east_out[1][3], south_out[1][3], result[1][31:0]);
+PE P10(clk, rst_n, done, A_data_reg[1][0], south_out[0][0], east_out[1][0], south_out[1][0], result[1][127:96]);
+PE P11(clk, rst_n, done, east_out[1][0], south_out[0][1], east_out[1][1], south_out[1][1], result[1][95:64]);
+PE P12(clk, rst_n, done, east_out[1][1], south_out[0][2], east_out[1][2], south_out[1][2], result[1][63:32]);
+PE P13(clk, rst_n, done, east_out[1][2], south_out[0][3], east_out[1][3], south_out[1][3], result[1][31:0]);
 
 // Third Row
-PE P20(clk, rst_n, A_data_reg[2][0], south_out[1][0], east_out[2][0], south_out[2][0], result[2][127:96]);
-PE P21(clk, rst_n, east_out[2][0], south_out[1][1], east_out[2][1], south_out[2][1], result[2][95:64]);
-PE P22(clk, rst_n, east_out[2][1], south_out[1][2], east_out[2][2], south_out[2][2], result[2][63:32]);
-PE P23(clk, rst_n, east_out[2][2], south_out[1][3], east_out[2][3], south_out[2][3], result[2][31:0]);
+PE P20(clk, rst_n, done, A_data_reg[2][0], south_out[1][0], east_out[2][0], south_out[2][0], result[2][127:96]);
+PE P21(clk, rst_n, done, east_out[2][0], south_out[1][1], east_out[2][1], south_out[2][1], result[2][95:64]);
+PE P22(clk, rst_n, done, east_out[2][1], south_out[1][2], east_out[2][2], south_out[2][2], result[2][63:32]);
+PE P23(clk, rst_n, done, east_out[2][2], south_out[1][3], east_out[2][3], south_out[2][3], result[2][31:0]);
 
 // Fourth Row
-PE P30(clk, rst_n, A_data_reg[3][0], south_out[2][0], east_out[3][0], south_out[3][0], result[3][127:96]);
-PE P31(clk, rst_n, east_out[3][0], south_out[2][1], east_out[3][1], south_out[3][1], result[3][95:64]);
-PE P32(clk, rst_n, east_out[3][1], south_out[2][2], east_out[3][2], south_out[3][2], result[3][63:32]);
-PE P33(clk, rst_n, east_out[3][2], south_out[2][3], east_out[3][3], south_out[3][3], result[3][31:0]);
+PE P30(clk, rst_n, done, A_data_reg[3][0], south_out[2][0], east_out[3][0], south_out[3][0], result[3][127:96]);
+PE P31(clk, rst_n, done, east_out[3][0], south_out[2][1], east_out[3][1], south_out[3][1], result[3][95:64]);
+PE P32(clk, rst_n, done, east_out[3][1], south_out[2][2], east_out[3][2], south_out[3][2], result[3][63:32]);
+PE P33(clk, rst_n, done, east_out[3][2], south_out[2][3], east_out[3][3], south_out[3][3], result[3][31:0]);
 
 
 always @ (posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         busy <= 1'b0;
+        done <= 1'b0;
         
         A_wr_en <= 1'b0;
         A_index <= 16'b0;
@@ -137,6 +141,7 @@ always @ (posedge clk or negedge rst_n) begin
     end
     else if(in_valid) begin
         busy <= 1'b1;
+        done <= 1'b0;
         // $display("Counter= %d, in_valid => busy\n", counter);
         // $display("M= %d, K= %d, N= %d", M, K, N);
         M_reg <= M;
@@ -145,7 +150,7 @@ always @ (posedge clk or negedge rst_n) begin
     end
     else if(busy) begin
 
-        $display("Counter: %d\n", counter);
+        // $display("Counter: %d\n", counter);
 
         for(i=0; i<4; i=i+1) begin
             A_data_reg[i][0] = A_data_reg[i][1];
@@ -171,14 +176,14 @@ always @ (posedge clk or negedge rst_n) begin
             B_data_reg[3][3] = B_data_out[7: 0];
         end
 
-        $display("A_data_reg:\n");
+        /* $display("A_data_reg:\n");
         for(i=0; i<4; i=i+1) 
             $display("%3d %3d %3d %3d\n", A_data_reg[i][3], A_data_reg[i][2], A_data_reg[i][1], A_data_reg[i][0]);
 
         $display("B_data_reg:\n");
         for(i=3; i>=0; i=i-1)
             $display("%3d %3d %3d %3d\n", B_data_reg[0][i], B_data_reg[1][i], B_data_reg[2][i], B_data_reg[3][i]);
-
+ */
 
         if(counter < K_reg) begin
             A_index <= A_index + 1;
@@ -189,7 +194,7 @@ always @ (posedge clk or negedge rst_n) begin
             B_index <= 16'b0;
         end
 
-        $display("Result:\n");
+        /* $display("Result:\n");
         $display("%10d %10d %10d %10d\n", result[0][127:96], result[0][95:64], result[0][63:32], result[0][31:0]);
         $display("%10d %10d %10d %10d\n", result[1][127:96], result[1][95:64], result[1][63:32], result[1][31:0]);
         $display("%10d %10d %10d %10d\n", result[2][127:96], result[2][95:64], result[2][63:32], result[2][31:0]);
@@ -205,7 +210,7 @@ always @ (posedge clk or negedge rst_n) begin
         $display("%10d %10d %10d %10d\n", east_out[0][0], east_out[0][1], east_out[0][2], east_out[0][3]);
         $display("%10d %10d %10d %10d\n", east_out[1][0], east_out[1][1], east_out[1][2], east_out[1][3]);
         $display("%10d %10d %10d %10d\n", east_out[2][0], east_out[2][1], east_out[2][2], east_out[2][3]);
-        $display("%10d %10d %10d %10d\n", east_out[3][0], east_out[3][1], east_out[3][2], east_out[3][3]);
+        $display("%10d %10d %10d %10d\n", east_out[3][0], east_out[3][1], east_out[3][2], east_out[3][3]); */
         
         if(counter >= 2*K_reg) begin
             C_wr_en = 1'b1;
@@ -220,8 +225,9 @@ always @ (posedge clk or negedge rst_n) begin
         counter <= counter + 1;
 
         if(counter == 3*K_reg + 1) begin
-            busy = 1'b0;
-            counter = 8'b0;
+            busy <= 1'b0;
+            done <= 1'b1;
+            counter <= 8'b0;
         end
 
     end

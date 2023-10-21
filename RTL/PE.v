@@ -2,6 +2,7 @@
 module PE(
     input           clk,
     input           rst_n,
+    input           done,
 
     input [7:0]     west_in,
     input [7:0]     north_in,
@@ -14,7 +15,7 @@ module PE(
 reg [31:0] mult_res;
 
 always @(negedge clk or negedge rst_n) begin
-    if(!rst_n) begin
+    if(!rst_n || done) begin
         east_out <= 8'b0;
         south_out <= 8'b0;
         result <= 32'b0;
