@@ -70,7 +70,7 @@ reg [7:0] A_data_reg [3:0][3:0];
 reg [7:0] B_data_reg [3:0][3:0];
 
 // Counter
-reg [7:0] counter;
+reg [15:0] counter;
 
 // register for size
 reg [7:0] K_reg, M_reg, N_reg;
@@ -119,7 +119,7 @@ always @ (posedge clk or negedge rst_n) begin
         C_index <= 16'b0;
         C_data_in <= 128'b0;
 
-        counter <= 8'b0;
+        counter <= 16'b0;
 
         K_reg <= 8'b0;
         M_reg <= 8'b0;
@@ -164,7 +164,7 @@ always @ (posedge clk or negedge rst_n) begin
             B_data_reg[i][3] = 8'b0;
         end
         
-        if(counter <= K_reg) begin
+        if(counter < K_reg) begin
             A_data_reg[0][0] = A_data_out[31: 24];
             A_data_reg[1][1] = A_data_out[23: 16];
             A_data_reg[2][2] = A_data_out[15: 8];
@@ -176,14 +176,13 @@ always @ (posedge clk or negedge rst_n) begin
             B_data_reg[3][3] = B_data_out[7: 0];
         end
 
-        /* $display("A_data_reg:\n");
-        for(i=0; i<4; i=i+1) 
-            $display("%3d %3d %3d %3d\n", A_data_reg[i][3], A_data_reg[i][2], A_data_reg[i][1], A_data_reg[i][0]);
+        // $display("A_data_reg:\n");
+        // for(i=0; i<4; i=i+1) 
+        //     $display("%3d %3d %3d %3d\n", A_data_reg[i][3], A_data_reg[i][2], A_data_reg[i][1], A_data_reg[i][0]);
 
-        $display("B_data_reg:\n");
-        for(i=3; i>=0; i=i-1)
-            $display("%3d %3d %3d %3d\n", B_data_reg[0][i], B_data_reg[1][i], B_data_reg[2][i], B_data_reg[3][i]);
- */
+        // $display("B_data_reg:\n");
+        // for(i=3; i>=0; i=i-1)
+        //     $display("%3d %3d %3d %3d\n", B_data_reg[0][i], B_data_reg[1][i], B_data_reg[2][i], B_data_reg[3][i]);
 
         if(counter < K_reg) begin
             A_index <= A_index + 1;
@@ -194,27 +193,27 @@ always @ (posedge clk or negedge rst_n) begin
             B_index <= 16'b0;
         end
 
-        /* $display("Result:\n");
-        $display("%10d %10d %10d %10d\n", result[0][127:96], result[0][95:64], result[0][63:32], result[0][31:0]);
-        $display("%10d %10d %10d %10d\n", result[1][127:96], result[1][95:64], result[1][63:32], result[1][31:0]);
-        $display("%10d %10d %10d %10d\n", result[2][127:96], result[2][95:64], result[2][63:32], result[2][31:0]);
-        $display("%10d %10d %10d %10d\n", result[3][127:96], result[3][95:64], result[3][63:32], result[3][31:0]);
+        // $display("Result:\n");
+        // $display("%10d %10d %10d %10d\n", result[0][127:96], result[0][95:64], result[0][63:32], result[0][31:0]);
+        // $display("%10d %10d %10d %10d\n", result[1][127:96], result[1][95:64], result[1][63:32], result[1][31:0]);
+        // $display("%10d %10d %10d %10d\n", result[2][127:96], result[2][95:64], result[2][63:32], result[2][31:0]);
+        // $display("%10d %10d %10d %10d\n", result[3][127:96], result[3][95:64], result[3][63:32], result[3][31:0]);
 
-        $display("South out:\n");
-        $display("%10d %10d %10d %10d\n", south_out[0][0], south_out[0][1], south_out[0][2], south_out[0][3]);
-        $display("%10d %10d %10d %10d\n", south_out[1][0], south_out[1][1], south_out[1][2], south_out[1][3]);
-        $display("%10d %10d %10d %10d\n", south_out[2][0], south_out[2][1], south_out[2][2], south_out[2][3]);
-        $display("%10d %10d %10d %10d\n", south_out[3][0], south_out[3][1], south_out[3][2], south_out[3][3]);
+        // $display("South out:\n");
+        // $display("%10d %10d %10d %10d\n", south_out[0][0], south_out[0][1], south_out[0][2], south_out[0][3]);
+        // $display("%10d %10d %10d %10d\n", south_out[1][0], south_out[1][1], south_out[1][2], south_out[1][3]);
+        // $display("%10d %10d %10d %10d\n", south_out[2][0], south_out[2][1], south_out[2][2], south_out[2][3]);
+        // $display("%10d %10d %10d %10d\n", south_out[3][0], south_out[3][1], south_out[3][2], south_out[3][3]);
 
-        $display("East out:\n");
-        $display("%10d %10d %10d %10d\n", east_out[0][0], east_out[0][1], east_out[0][2], east_out[0][3]);
-        $display("%10d %10d %10d %10d\n", east_out[1][0], east_out[1][1], east_out[1][2], east_out[1][3]);
-        $display("%10d %10d %10d %10d\n", east_out[2][0], east_out[2][1], east_out[2][2], east_out[2][3]);
-        $display("%10d %10d %10d %10d\n", east_out[3][0], east_out[3][1], east_out[3][2], east_out[3][3]); */
+        // $display("East out:\n");
+        // $display("%10d %10d %10d %10d\n", east_out[0][0], east_out[0][1], east_out[0][2], east_out[0][3]);
+        // $display("%10d %10d %10d %10d\n", east_out[1][0], east_out[1][1], east_out[1][2], east_out[1][3]);
+        // $display("%10d %10d %10d %10d\n", east_out[2][0], east_out[2][1], east_out[2][2], east_out[2][3]);
+        // $display("%10d %10d %10d %10d\n", east_out[3][0], east_out[3][1], east_out[3][2], east_out[3][3]);
         
-        if(counter >= 2*K_reg) begin
+        if(counter >= K_reg + N_reg) begin
             C_wr_en = 1'b1;
-            C_index = counter - 2*K_reg;
+            C_index = counter - K_reg - N_reg;
             C_data_in = result[C_index];
         end
         else begin
@@ -224,7 +223,8 @@ always @ (posedge clk or negedge rst_n) begin
 
         counter <= counter + 1;
 
-        if(counter == 3*K_reg + 1) begin
+        if(counter == K_reg + M_reg + N_reg) begin
+            // $display("Counter: %3d, K_reg: %3d, M_reg: %3d, N_reg: %3d\n", counter, K_reg, M_reg, N_reg);
             busy <= 1'b0;
             done <= 1'b1;
             counter <= 8'b0;
