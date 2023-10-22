@@ -36,6 +36,8 @@ wire [127:0]    C_data_out;
 
 
 initial begin
+    // $dumpfile("tpu.vcd");
+    // $dumpvars;
     `ifdef RTL
         // $fsdbDumpfile("TPU.fsdb");
         // $fsdbDumpvars(0,"+mda");
