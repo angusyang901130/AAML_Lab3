@@ -1,4 +1,4 @@
-# AAML2023 Lab3
+# Systolic Array
 
 
 Brief introduction of Lab3
